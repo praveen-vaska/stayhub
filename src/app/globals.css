@@ -1,27 +1,257 @@
+@import "leaflet/dist/leaflet.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   Theme tokens
+   ========================================================================== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F7F8FA;
+  --foreground: #142D4E;
+  --card: #FFFFFF;
+  --border: #E7EDF3;
+  --scroll-track: #F7F8FA;
+  --scroll-thumb: #D2DCE6;
+  --scroll-thumb-hover: #B3C2D1;
+  --skeleton-a: #EEF2F6;
+  --skeleton-b: #F8FAFC;
+  --canvas: #FFFFFF;
+  --canvas-alt: #F7F8FA;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #0A1424;
+  --foreground: #E8EEF6;
+  --card: #111F35;
+  --border: #1E3150;
+  --scroll-track: #0A1424;
+  --scroll-thumb: #22385A;
+  --scroll-thumb-hover: #2D4A74;
+  --skeleton-a: #13233B;
+  --skeleton-b: #1A2E4B;
+  --canvas: #0A1424;
+  --canvas-alt: #0D1829;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--background);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+::selection {
+  background: rgba(21, 154, 145, 0.25);
+}
+
+/* Subtle, polished scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scroll-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-thumb-hover);
+}
+
+/* Custom cursor (CursorFollower): hide the system arrow, keep the I-beam in text fields */
+html.has-custom-cursor,
+html.has-custom-cursor * {
+  cursor: none !important;
+}
+html.has-custom-cursor input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]),
+html.has-custom-cursor textarea,
+html.has-custom-cursor [contenteditable="true"] {
+  cursor: text !important;
+}
+
+:focus-visible {
+  outline: 2px solid #159A91;
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Theme switching transitions
+   ========================================================================== */
+/* View Transitions API circular reveal (see ThemeProvider) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Fallback cross-fade for browsers without View Transitions */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, fill 0.4s ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================================================
+   Shared utilities
+   ========================================================================== */
+@layer components {
+  .skeleton {
+    background: linear-gradient(90deg, var(--skeleton-a) 25%, var(--skeleton-b) 50%, var(--skeleton-a) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
+  }
+
+  /* Glossy sweep on hover for primary CTAs */
+  .btn-shine {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .btn-shine::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-120%) skewX(-20deg);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+    transition: transform 0.7s ease;
+    z-index: -1;
+    pointer-events: none;
+  }
+  .btn-shine:hover::after {
+    transform: translateX(120%) skewX(-20deg);
+  }
+
+  .text-gradient {
+    background: linear-gradient(100deg, #2CC5B9 0%, #159A91 45%, #E9A23B 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .bg-grid {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ==========================================================================
+   Dark mode mapping for the brand colours hard-coded across pages.
+   New components use `dark:` variants directly; these rules give every
+   existing page (search, property, dashboards, auth…) a coherent dark theme.
+   ========================================================================== */
+.dark .bg-white,
+.dark .bg-card { background-color: #111F35; }
+.dark .bg-white\/90 { background-color: rgba(17, 31, 53, 0.9); }
+.dark .bg-\[\#F7F8FA\],
+.dark .bg-surface { background-color: #0F1B2E; }
+.dark .bg-\[\#F0F4F8\],
+.dark .bg-\[\#E7EDF3\],
+.dark .bg-slate-100 { background-color: #1A2B45; }
+.dark .bg-slate-300 { background-color: #2D4A74; }
+.dark .bg-\[\#E8F5F4\],
+.dark .bg-\[\#E8F5F4\]\/80,
+.dark .bg-emerald-50 { background-color: rgba(21, 154, 145, 0.14); }
+.dark .bg-\[\#FEF7EE\],
+.dark .bg-amber-50 { background-color: rgba(233, 162, 59, 0.12); }
+.dark .bg-rose-50,
+.dark .bg-rose-100 { background-color: rgba(244, 63, 94, 0.12); }
+.dark .bg-\[\#142D4E\] { background-color: #1C3C66; }
+.dark .bg-\[\#0E2038\] { background-color: #0C182B; }
+
+.dark .hover\:bg-white:hover { background-color: #15253F; }
+.dark .hover\:bg-\[\#F7F8FA\]:hover { background-color: #15253F; }
+.dark .hover\:bg-\[\#E7EDF3\]:hover { background-color: #1E3150; }
+.dark .hover\:bg-\[\#E8F5F4\]:hover { background-color: rgba(21, 154, 145, 0.18); }
+.dark .hover\:bg-rose-50:hover { background-color: rgba(244, 63, 94, 0.14); }
+
+.dark .text-\[\#142D4E\],
+.dark .text-primary,
+.dark .text-slate-800,
+.dark .text-slate-700 { color: #E8EEF6; }
+.dark .text-\[\#374A60\],
+.dark .text-slate-600 { color: #C3CFDD; }
+.dark .text-\[\#667A91\],
+.dark .text-slate-500 { color: #93A4B9; }
+.dark .text-\[\#B3C2D1\] { color: #3A5579; }
+.dark .text-rose-800,
+.dark .text-rose-700 { color: #FDA4AF; }
+.dark .text-emerald-800 { color: #6EE7B7; }
+.dark .text-amber-800 { color: #FCD34D; }
+.dark .hover\:text-\[\#142D4E\]:hover { color: #FFFFFF; }
+
+.dark .border-\[\#E7EDF3\],
+.dark .border-slate-300,
+.dark .divide-\[\#E7EDF3\] > :not([hidden]) ~ :not([hidden]) { border-color: #1E3150; }
+.dark .border-rose-200 { border-color: rgba(244, 63, 94, 0.3); }
+.dark .border-emerald-200 { border-color: rgba(16, 185, 129, 0.3); }
+.dark .border-amber-200 { border-color: rgba(245, 158, 11, 0.3); }
+.dark .border-\[\#142D4E\]\/30,
+.dark .hover\:border-\[\#142D4E\]\/30:hover { border-color: rgba(232, 238, 246, 0.25); }
+
+.dark input,
+.dark select,
+.dark textarea {
+  color-scheme: dark;
+}
+.dark select option {
+  background-color: #111F35;
+  color: #E8EEF6;
+}
+.dark .placeholder-slate-400::placeholder { color: #5F7390; }
+
+/* Leaflet Container styling */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 1.25rem;
+  z-index: 10;
+  background: var(--background);
+}
+.dark .leaflet-tile-pane {
+  filter: brightness(0.75) invert(1) contrast(0.9) hue-rotate(200deg) saturate(0.35) brightness(0.85);
+}
+
+.custom-map-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
