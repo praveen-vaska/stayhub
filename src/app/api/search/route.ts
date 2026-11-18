@@ -1,0 +1,85 @@
+import { NextResponse } from "next/server";
+import { db } from "@/lib/db/storage";
+import { searchGooglePlaces } from "@/lib/services/googlePlaces";
+
+// Avoid hitting Google on every keystroke / repeated query (per server instance).
+const CACHE_TTL_MS = 10 * 60 * 1000;
+const placesCache = new Map<string, { at: number; ids: string[] }>();
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+
+    const city = searchParams.get("city") || undefined;
+    const locality = searchParams.get("locality") || undefined;
+    const category = searchParams.get("category") || undefined;
+    const minPrice = searchParams.get("minPrice") ? Number(searchParams.get("minPrice")) : undefined;
+    const maxPrice = searchParams.get("maxPrice") ? Number(searchParams.get("maxPrice")) : undefined;
+    const genderPreference = searchParams.get("genderPreference") || undefined;
+    const furnishingStatus = searchParams.get("furnishingStatus") || undefined;
+    const sharingType = searchParams.get("sharingType") || undefined;
+    const rating = searchParams.get("rating") ? Number(searchParams.get("rating")) : undefined;
+    const availableNow = searchParams.get("availableNow") === "true";
+    const searchQuery = searchParams.get("q") || searchParams.get("searchQuery") || undefined;
+    const sort = (searchParams.get("sort") as any) || "recommended";
+    const page = searchParams.get("page") ? Number(searchParams.get("page")) : 1;
+    const limit = searchParams.get("limit") ? Number(searchParams.get("limit")) : 12;
+    const amenities = searchParams.getAll("amenity");
+
+    const cityParam = city && city !== "All" ? city : undefined;
+    const localityParam = locality && locality !== "All" ? locality : undefined;
+    const categoryParam = category && category !== "All" ? category : undefined;
+
+    // Seamlessly query Google Places API (New) if API key is present
+    let googleIds: string[] = [];
+    if (process.env.GOOGLE_PLACES_API_KEY && (cityParam || localityParam || searchQuery)) {
+      const cacheKey = JSON.stringify([cityParam, localityParam, categoryParam, searchQuery?.toLowerCase().trim()]);
+      const cached = placesCache.get(cacheKey);
+      if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
+        googleIds = cached.ids;
+      } else {
+        try {
+          const livePlaces = await searchGooglePlaces({
+            city: cityParam,
+            locality: localityParam,
+            category: categoryParam,
+            query: searchQuery,
+            limit: 20,
+          });
+
+          if (livePlaces.length > 0) {
+            db.addGoogleProperties(livePlaces);
+          }
+          googleIds = livePlaces.map((p) => p.id);
+          placesCache.set(cacheKey, { at: Date.now(), ids: googleIds });
+        } catch (placeErr) {
+          console.warn("Google Places fetch non-critical warning:", placeErr);
+        }
+      }
+    }
+
+    const result = db.getProperties({
+      city,
+      locality,
+      category,
+      minPrice,
+      maxPrice,
+      genderPreference,
+      furnishingStatus,
+      sharingType,
+      rating,
+      availableNow,
+      searchQuery,
+      // Google already matched these to the query; keep them even if the wording differs
+      includeIds: googleIds,
+      sort,
+      page,
+      limit,
+      amenities: amenities.length > 0 ? amenities : undefined,
+    });
+
+    return NextResponse.json(result);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || "Search failed" }, { status: 500 });
+  }
+}
