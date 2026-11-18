@@ -1,8 +1,13 @@
 "use client";
 
+<<<<<<< HEAD
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+=======
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 import {
   Sparkles,
   Bed,
@@ -21,7 +26,10 @@ import {
   TrendingDown,
   Star,
   Clock,
+<<<<<<< HEAD
   MapPin,
+=======
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 } from "lucide-react";
 import FancySelect, { type FancyOption } from "@/components/common/FancySelect";
 
@@ -67,12 +75,17 @@ export default function TopFilterBar({
   query,
   onQueryChange,
 }: TopFilterBarProps) {
+<<<<<<< HEAD
   const router = useRouter();
   // Local input state, debounced into the parent so typing feels instant
   const [text, setText] = useState(query);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+=======
+  // Local input state, debounced into the parent so typing feels instant
+  const [text, setText] = useState(query);
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 
   useEffect(() => setText(query), [query]);
 
@@ -82,6 +95,7 @@ export default function TopFilterBar({
     return () => window.clearTimeout(id);
   }, [text, query, onQueryChange]);
 
+<<<<<<< HEAD
   // Autocomplete fetch for search bar
   useEffect(() => {
     if (text.trim().length > 1) {
@@ -122,6 +136,8 @@ export default function TopFilterBar({
     setShowSuggestions(false);
   };
 
+=======
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
   const viewBtn = (mode: "list" | "split" | "map") =>
     `relative flex items-center justify-center h-8 px-2 rounded-lg transition-colors ${
       viewMode === mode ? "text-[#142D4E] dark:text-white" : "text-[#667A91] hover:text-[#142D4E]"
@@ -131,6 +147,7 @@ export default function TopFilterBar({
     <div className="bg-white rounded-2xl p-3 border border-[#E7EDF3] shadow-soft space-y-3">
       {/* Row 1: name search + controls */}
       <div className="flex flex-col md:flex-row md:items-center gap-2.5">
+<<<<<<< HEAD
         <div className="relative flex-1 min-w-0" ref={searchRef}>
           <form
             onSubmit={(e) => {
@@ -232,6 +249,39 @@ export default function TopFilterBar({
             )}
           </AnimatePresence>
         </div>
+=======
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onQueryChange(text.trim());
+          }}
+          className="flex-1 min-w-0 flex items-center gap-2.5 h-11 px-3.5 rounded-xl bg-[#F7F8FA] border border-[#E7EDF3] focus-within:border-[#159A91] focus-within:ring-4 focus-within:ring-[#159A91]/10 transition-all"
+          role="search"
+        >
+          <Search className="w-4 h-4 text-[#159A91] shrink-0" />
+          <input
+            type="search"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Search PGs, hostels, hotels by name or area…"
+            aria-label="Search stays by name"
+            className="w-full min-w-0 bg-transparent text-sm font-medium text-[#142D4E] placeholder:text-slate-400 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+          />
+          {text && (
+            <button
+              type="button"
+              onClick={() => {
+                setText("");
+                onQueryChange("");
+              }}
+              className="shrink-0 w-6 h-6 rounded-md flex items-center justify-center text-[#667A91] hover:text-[#142D4E] hover:bg-[#E7EDF3] transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </form>
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 
         <div className="flex items-center justify-between md:justify-end gap-2">
           <button

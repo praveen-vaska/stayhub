@@ -5,7 +5,10 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Property, Review } from "@/types";
 import { formatPrice } from "@/lib/utils/formatters";
+<<<<<<< HEAD
 import { getAccommodationFallback } from "@/lib/utils/fallbackImages";
+=======
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 import { useAuth } from "@/lib/auth/context";
 import EnquiryModal from "@/components/property/EnquiryModal";
 import InteractiveMap from "@/components/search/InteractiveMap";
@@ -30,12 +33,15 @@ import {
   CheckCircle2,
   Info,
   ExternalLink,
+<<<<<<< HEAD
   Maximize2,
   Minimize2,
   Grid,
   Camera,
   X,
   Sparkles,
+=======
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 } from "lucide-react";
 
 export default function PropertyDetailsPage() {
@@ -47,9 +53,12 @@ export default function PropertyDetailsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
+<<<<<<< HEAD
   const [fitMode, setFitMode] = useState<"contain" | "cover">("contain");
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [galleryView, setGalleryView] = useState<"carousel" | "grid">("carousel");
+=======
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
   const [isEnquiryModalOpen, setIsEnquiryModalOpen] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -79,6 +88,7 @@ export default function PropertyDetailsPage() {
     loadData();
   }, [slug]);
 
+<<<<<<< HEAD
   // Fullscreen Lightbox keyboard controls (Escape to close, Left/Right arrows to flip)
   const allImages = property?.images && property.images.length > 0 ? property.images : (property ? [property.coverImage] : []);
 
@@ -93,6 +103,8 @@ export default function PropertyDetailsPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isLightboxOpen, allImages.length]);
 
+=======
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F7F8FA]">
@@ -157,6 +169,11 @@ export default function PropertyDetailsPage() {
     }
   };
 
+<<<<<<< HEAD
+=======
+  const allImages = property.images && property.images.length > 0 ? property.images : [property.coverImage];
+
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
   const whatsappMessage = encodeURIComponent(
     `Hi ${property.contact.name}, I am inquiring about "${property.title}" on StayHub.`
   );
@@ -260,6 +277,7 @@ export default function PropertyDetailsPage() {
           </div>
         </div>
 
+<<<<<<< HEAD
         {/* Modern Image Gallery & Controls */}
         <div className="space-y-3">
           {/* Gallery Header Bar */}
@@ -475,6 +493,54 @@ export default function PropertyDetailsPage() {
                   </div>
                 ))}
               </div>
+=======
+        {/* Image Gallery */}
+        <div className="space-y-3">
+          <div className="relative aspect-[16/9] sm:aspect-[21/9] max-h-[480px] w-full rounded-2xl overflow-hidden bg-[#142D4E] shadow-card group">
+            <img
+              src={allImages[activeImageIdx]}
+              alt={property.title}
+              className="w-full h-full object-cover transition-all duration-300"
+            />
+
+            {allImages.length > 1 && (
+              <>
+                <button
+                  onClick={() => setActiveImageIdx((prev) => (prev > 0 ? prev - 1 : allImages.length - 1))}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-[#142D4E] shadow-md transition-transform"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setActiveImageIdx((prev) => (prev < allImages.length - 1 ? prev + 1 : 0))}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-[#142D4E] shadow-md transition-transform"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </>
+            )}
+
+            <div className="absolute bottom-4 right-4 bg-[#142D4E]/80 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-md">
+              Photo {activeImageIdx + 1} of {allImages.length}
+            </div>
+          </div>
+
+          {allImages.length > 1 && (
+            <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
+              {allImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveImageIdx(idx)}
+                  className={`relative w-24 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${
+                    activeImageIdx === idx
+                      ? "border-[#159A91] shadow-sm"
+                      : "border-transparent opacity-75 hover:opacity-100"
+                  }`}
+                >
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
             </div>
           )}
         </div>
@@ -800,6 +866,7 @@ export default function PropertyDetailsPage() {
         </div>
       </div>
 
+<<<<<<< HEAD
       {/* Fullscreen High-Res Lightbox Modal (Escape to close, Arrows to navigate) */}
       {isLightboxOpen && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col justify-between p-4 sm:p-6 text-white select-none animate-fade-in">
@@ -892,6 +959,8 @@ export default function PropertyDetailsPage() {
         </div>
       )}
 
+=======
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
       <EnquiryModal
         property={property}
         isOpen={isEnquiryModalOpen}

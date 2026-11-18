@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
+<<<<<<< HEAD
 import { db, LocationSuggestion } from "@/lib/db/storage";
+=======
+import { db } from "@/lib/db/storage";
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q") || "";
+<<<<<<< HEAD
   const cleanQ = q.trim();
 
   if (!cleanQ || cleanQ.length < 2) {
@@ -74,4 +79,8 @@ export async function GET(request: Request) {
   }
 
   return NextResponse.json({ suggestions: merged.slice(0, 12) });
+=======
+  const suggestions = db.searchLocations(q);
+  return NextResponse.json({ suggestions });
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 }

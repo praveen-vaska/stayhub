@@ -6,7 +6,10 @@ import { useAuth } from "@/lib/auth/context";
 import { PropertyCategory, GenderPreference, FurnishingStatus, PricingType } from "@/types";
 import { SEED_CITIES } from "@/lib/db/seedData";
 import { formatPrice } from "@/lib/utils/formatters";
+<<<<<<< HEAD
 import { getAccommodationFallback } from "@/lib/utils/fallbackImages";
+=======
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 import {
   CheckCircle2,
   ArrowRight,
@@ -691,6 +694,7 @@ export default function AddPropertyPage() {
               <div className="p-4 rounded-xl bg-[#F7F8FA] border border-[#E7EDF3] space-y-3">
                 <div className="flex items-start gap-4">
                   <img
+<<<<<<< HEAD
                     src={formData.coverImage || formData.images[0] || getAccommodationFallback(formData.category, formData.title)}
                     alt=""
                     onError={(e) => {
@@ -699,6 +703,10 @@ export default function AddPropertyPage() {
                         e.currentTarget.src = fallback;
                       }
                     }}
+=======
+                    src={formData.coverImage || formData.images[0]}
+                    alt=""
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
                     className="w-20 h-20 rounded-xl object-cover shrink-0"
                   />
                   <div>

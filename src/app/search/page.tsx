@@ -5,7 +5,11 @@ import { useSearchParams } from "next/navigation";
 import { Property } from "@/types";
 import TopFilterBar from "@/components/search/TopFilterBar";
 import SearchFilters, { FilterState } from "@/components/search/SearchFilters";
+<<<<<<< HEAD
 import PropertyCard, { PropertyCardSkeleton } from "@/components/search/PropertyCard";
+=======
+import PropertyCard from "@/components/search/PropertyCard";
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 import InteractiveMap from "@/components/search/InteractiveMap";
 import EnquiryModal from "@/components/property/EnquiryModal";
 import {
@@ -219,7 +223,11 @@ function SearchPageContent() {
                   {loading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {[1, 2, 3, 4].map((n) => (
+<<<<<<< HEAD
                         <PropertyCardSkeleton key={n} />
+=======
+                        <div key={n} className="h-80 rounded-2xl bg-white border border-[#E7EDF3] animate-pulse" />
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
                       ))}
                     </div>
                   ) : properties.length === 0 ? (
@@ -291,7 +299,11 @@ function SearchPageContent() {
                 {loading ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                     {[1, 2, 3, 4, 5, 6].map((n) => (
+<<<<<<< HEAD
                       <PropertyCardSkeleton key={n} />
+=======
+                      <div key={n} className="h-80 rounded-2xl bg-white border border-[#E7EDF3] animate-pulse" />
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
                     ))}
                   </div>
                 ) : properties.length === 0 ? (

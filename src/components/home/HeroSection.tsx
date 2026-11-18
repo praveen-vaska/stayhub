@@ -43,6 +43,7 @@ const BUDGET_OPTIONS: FancyOption[] = [
 ];
 
 interface Suggestion {
+<<<<<<< HEAD
   type: "city" | "locality" | "sublocality" | "property";
   name: string;
   city: string;
@@ -52,6 +53,12 @@ interface Suggestion {
   slug?: string;
   category?: string;
   price?: number;
+=======
+  type: "city" | "locality";
+  name: string;
+  city: string;
+  state: string;
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 }
 
 const HERO_SLIDES = [
@@ -242,6 +249,7 @@ export default function HeroSection() {
   }, []);
 
   const handleSelectSuggestion = (item: Suggestion) => {
+<<<<<<< HEAD
     if (item.type === "property" && item.slug) {
       router.push(`/property/${item.slug}`);
       setShowSuggestions(false);
@@ -262,6 +270,8 @@ export default function HeroSection() {
       return;
     }
 
+=======
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
     if (item.type === "locality") {
       setQuery(`${item.name}, ${item.city}`);
       setSelectedCity(item.city);
@@ -291,6 +301,7 @@ export default function HeroSection() {
       params.set("minPrice", "25000");
     }
 
+<<<<<<< HEAD
     if (query.trim()) {
       const cleanQ = query.replace(new RegExp(selectedCity, "gi"), "").replace(/,/g, "").trim();
       if (cleanQ) {
@@ -298,6 +309,10 @@ export default function HeroSection() {
       } else if (query.trim() !== selectedCity && !selectedLocality) {
         params.set("q", query.trim());
       }
+=======
+    if (query && !selectedLocality && selectedCity !== query) {
+      params.set("q", query);
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
     }
 
     router.push(`/search?${params.toString()}`);
@@ -534,6 +549,7 @@ export default function HeroSection() {
                             transition={{ duration: 0.18 }}
                             className="bg-white dark:bg-[#111F35] rounded-2xl shadow-dropdown border border-[#E7EDF3] dark:border-[#1E3150] py-2 overflow-hidden"
                           >
+<<<<<<< HEAD
                             <div className="px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#667A91] flex items-center justify-between">
                               <span>Suggestions (Locations & Stays)</span>
                               <span className="text-[9px] text-[#159A91] font-semibold">Auto-detected</span>
@@ -583,6 +599,34 @@ export default function HeroSection() {
                                 </button>
                               ))}
                             </div>
+=======
+                            <div className="px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#667A91]">
+                              Suggested Locations
+                            </div>
+                            {suggestions.map((s, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => handleSelectSuggestion(s)}
+                                className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left hover:bg-[#E8F5F4] transition-colors"
+                              >
+                                <div className="w-8 h-8 rounded-lg bg-[#E8F5F4] flex items-center justify-center text-[#159A91] shrink-0">
+                                  <MapPin className="w-4 h-4" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-sm font-bold text-[#142D4E] truncate">
+                                    {s.name}
+                                    {s.type === "locality" && (
+                                      <span className="text-xs font-normal text-[#667A91]">, {s.city}</span>
+                                    )}
+                                  </p>
+                                  <p className="text-[11px] text-[#667A91]">
+                                    {s.type === "locality" ? `Locality in ${s.city}, ${s.state}` : `City in ${s.state}`}
+                                  </p>
+                                </div>
+                              </button>
+                            ))}
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
                           </motion.div>
                         )}
                       </AnimatePresence>

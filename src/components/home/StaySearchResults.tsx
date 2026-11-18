@@ -5,7 +5,10 @@ import { motion } from "framer-motion";
 import { ArrowRight, BadgeCheck, MapPin, SearchX, Star, AlertTriangle } from "lucide-react";
 import type { Property } from "@/types";
 import { formatPrice } from "@/lib/utils/formatters";
+<<<<<<< HEAD
 import { getAccommodationFallback } from "@/lib/utils/fallbackImages";
+=======
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 
 const CATEGORY_STYLES: Record<string, string> = {
   PG: "bg-[#159A91]/10 text-[#118079] dark:text-[#2CC5B9]",
@@ -148,6 +151,7 @@ export default function StaySearchResults({
                   <div className="relative w-14 h-14 shrink-0 rounded-xl overflow-hidden bg-slate-100 dark:bg-white/5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
+<<<<<<< HEAD
                       src={p.coverImage || p.images?.[0] || getAccommodationFallback(p.category, p.id)}
                       alt=""
                       loading="lazy"
@@ -158,6 +162,13 @@ export default function StaySearchResults({
                           e.currentTarget.src = fallback;
                         }
                       }}
+=======
+                      src={p.coverImage || p.images?.[0]}
+                      alt=""
+                      loading="lazy"
+                      className={`w-full h-full object-cover transition-transform duration-500 ${active ? "scale-110" : ""}`}
+                      onError={(e) => ((e.currentTarget.style.visibility = "hidden"))}
+>>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
                     />
                   </div>
                   <div className="min-w-0 flex-1">
