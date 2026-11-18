@@ -174,7 +174,6 @@ function normalizeText(s: string) {
     .trim();
 }
 
-<<<<<<< HEAD
 export interface LocationSuggestion {
   type: "city" | "locality" | "sublocality" | "property";
   name: string;
@@ -188,31 +187,21 @@ export interface LocationSuggestion {
   stayCount?: number;
 }
 
-=======
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 export const db = {
   // Properties
   getProperties(params: PropertyFilterParams = {}) {
     let list = [...store.properties];
-<<<<<<< HEAD
     const keep = new Set(params.includeIds || []);
 
     // Filter by approval status unless specifically requesting all/owner's
     if (!params.includeAllStatus) {
       list = list.filter((p) => p.approvalStatus === "approved" || keep.has(p.id));
-=======
-
-    // Filter by approval status unless specifically requesting all/owner's
-    if (!params.includeAllStatus) {
-      list = list.filter((p) => p.approvalStatus === "approved");
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
     }
 
     if (params.ownerId) {
       list = list.filter((p) => p.ownerId === params.ownerId);
     }
 
-<<<<<<< HEAD
     // City filter (or matches anywhere in address)
     if (params.city && params.city !== "All") {
       const cityClean = params.city.toLowerCase().trim();
@@ -232,23 +221,10 @@ export const db = {
         p.address.toLowerCase().includes(locClean) ||
         p.title.toLowerCase().includes(locClean)
       );
-=======
-    // City filter
-    if (params.city && params.city !== "All") {
-      const cityClean = params.city.toLowerCase().trim();
-      list = list.filter((p) => p.city.toLowerCase() === cityClean);
-    }
-
-    // Locality filter
-    if (params.locality && params.locality !== "All") {
-      const locClean = params.locality.toLowerCase().trim();
-      list = list.filter((p) => p.locality.toLowerCase() === locClean);
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
     }
 
     // Category filter
     if (params.category && params.category !== "All") {
-<<<<<<< HEAD
       const catClean = params.category.toLowerCase().trim();
       list = list.filter((p) => 
         keep.has(p.id) || 
@@ -313,39 +289,6 @@ export const db = {
 
         return false;
       });
-=======
-      list = list.filter((p) => p.category.toLowerCase() === params.category!.toLowerCase());
-    }
-
-    // Free text search (name, locality, city, address, category).
-    // Every word must appear somewhere, so "durga pg" matches "Sri Durga Ladies PG".
-    // Ids in `includeIds` (e.g. Google Places hits for this query) are always kept.
-    // Relevance: 3 = name contains the whole phrase, 2 = name has every word,
-    // 1 = words found elsewhere (area/address), 0 = kept only because Google matched it.
-    const relevance = new Map<string, number>();
-    if (params.searchQuery) {
-      const phrase = normalizeText(params.searchQuery);
-      const tokens = phrase.split(" ").filter(Boolean);
-      const keep = new Set(params.includeIds || []);
-      if (tokens.length > 0) {
-        list = list.filter((p) => {
-          const title = normalizeText(p.title);
-          const haystack = normalizeText(`${p.title} ${p.locality} ${p.city} ${p.address} ${p.category}`);
-          const score = title.includes(phrase)
-            ? 3
-            : tokens.every((t) => title.includes(t))
-              ? 2
-              : tokens.every((t) => haystack.includes(t))
-                ? 1
-                : keep.has(p.id)
-                  ? 0
-                  : -1;
-          if (score < 0) return false;
-          relevance.set(p.id, score);
-          return true;
-        });
-      }
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
     }
 
     // Price range
@@ -517,7 +460,6 @@ export const db = {
     return city ? city.localities : [];
   },
 
-<<<<<<< HEAD
   searchLocations(query: string): LocationSuggestion[] {
     const q = query.toLowerCase().trim();
     if (!q || q.length < 2) return [];
@@ -556,26 +498,10 @@ export const db = {
               state: c.state,
             });
           }
-=======
-  searchLocations(query: string): Array<{ type: "city" | "locality"; name: string; city: string; state: string }> {
-    const q = query.toLowerCase().trim();
-    if (!q) return [];
-
-    const results: Array<{ type: "city" | "locality"; name: string; city: string; state: string }> = [];
-
-    store.cities.forEach((c) => {
-      if (c.name.toLowerCase().includes(q)) {
-        results.push({ type: "city", name: c.name, city: c.name, state: c.state });
-      }
-      c.localities.forEach((loc) => {
-        if (loc.toLowerCase().includes(q)) {
-          results.push({ type: "locality", name: loc, city: c.name, state: c.state });
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
         }
       });
     });
 
-<<<<<<< HEAD
     // 2. Check Property Names (Direct match)
     for (const p of store.properties) {
       if (!p.title) continue;
@@ -630,9 +556,6 @@ export const db = {
     }
 
     return results.slice(0, 12);
-=======
-    return results.slice(0, 8);
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
   },
 
   // Enquiries

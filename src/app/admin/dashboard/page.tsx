@@ -203,37 +203,41 @@ export default function AdminDashboardPage() {
         <div className="flex items-center gap-3 border-b border-coolBorder pb-2 overflow-x-auto scrollbar-none text-xs sm:text-sm font-bold">
           <button
             onClick={() => setActiveTab("properties")}
-            className={`px-4 py-2 rounded-xl transition-all ${activeTab === "properties"
+            className={`px-4 py-2 rounded-xl transition-all ${
+              activeTab === "properties"
                 ? "bg-primary text-white shadow-soft"
                 : "text-slate-600 hover:bg-slate-100 hover:text-primary"
-              }`}
+            }`}
           >
             Property Approvals ({properties.length})
           </button>
           <button
             onClick={() => setActiveTab("users")}
-            className={`px-4 py-2 rounded-xl transition-all ${activeTab === "users"
+            className={`px-4 py-2 rounded-xl transition-all ${
+              activeTab === "users"
                 ? "bg-primary text-white shadow-soft"
                 : "text-slate-600 hover:bg-slate-100 hover:text-primary"
-              }`}
+            }`}
           >
             Tenants / Users ({usersList.length})
           </button>
           <button
             onClick={() => setActiveTab("owners")}
-            className={`px-4 py-2 rounded-xl transition-all ${activeTab === "owners"
+            className={`px-4 py-2 rounded-xl transition-all ${
+              activeTab === "owners"
                 ? "bg-primary text-white shadow-soft"
                 : "text-slate-600 hover:bg-slate-100 hover:text-primary"
-              }`}
+            }`}
           >
             Property Owners ({ownersList.length})
           </button>
           <button
             onClick={() => setActiveTab("enquiries")}
-            className={`px-4 py-2 rounded-xl transition-all ${activeTab === "enquiries"
+            className={`px-4 py-2 rounded-xl transition-all ${
+              activeTab === "enquiries"
                 ? "bg-primary text-white shadow-soft"
                 : "text-slate-600 hover:bg-slate-100 hover:text-primary"
-              }`}
+            }`}
           >
             All Inquiries ({enquiries.length})
           </button>
@@ -254,8 +258,9 @@ export default function AdminDashboardPage() {
                   <button
                     key={st}
                     onClick={() => setStatusFilter(st)}
-                    className={`px-3 py-1.5 rounded-xl capitalize transition-all ${statusFilter === st ? "bg-white text-primary shadow-sm" : "text-slate-500 hover:text-primary"
-                      }`}
+                    className={`px-3 py-1.5 rounded-xl capitalize transition-all ${
+                      statusFilter === st ? "bg-white text-primary shadow-sm" : "text-slate-500 hover:text-primary"
+                    }`}
                   >
                     {st}
                   </button>
@@ -312,12 +317,13 @@ export default function AdminDashboardPage() {
                       </td>
                       <td className="py-4">
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${prop.approvalStatus === "approved"
+                          className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${
+                            prop.approvalStatus === "approved"
                               ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                               : prop.approvalStatus === "pending"
-                                ? "bg-amber-50 text-amber-800 border-amber-200"
-                                : "bg-rose-50 text-rose-800 border-rose-200"
-                            }`}
+                              ? "bg-amber-50 text-amber-800 border-amber-200"
+                              : "bg-rose-50 text-rose-800 border-rose-200"
+                          }`}
                         >
                           {prop.approvalStatus}
                         </span>

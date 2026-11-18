@@ -76,7 +76,6 @@ html.has-custom-cursor textarea,
 html.has-custom-cursor [contenteditable="true"] {
   cursor: text !important;
 }
-<<<<<<< HEAD
 html.has-custom-cursor .leaflet-container,
 html.has-custom-cursor .leaflet-container *,
 html.has-custom-cursor .gm-style,
@@ -93,8 +92,6 @@ html.has-custom-cursor .stayhub-price-marker,
 html.has-custom-cursor .stayhub-price-marker * {
   cursor: pointer !important;
 }
-=======
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 
 :focus-visible {
   outline: 2px solid #159A91;

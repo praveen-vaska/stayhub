@@ -4,10 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useCompare } from "@/lib/compare/context";
 import { formatPrice } from "@/lib/utils/formatters";
-<<<<<<< HEAD
 import { getAccommodationFallback } from "@/lib/utils/fallbackImages";
-=======
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 import EnquiryModal from "@/components/property/EnquiryModal";
 import { Property } from "@/types";
 import {
@@ -132,7 +129,6 @@ export default function ComparePage() {
                     <div className="space-y-2">
                       <div className="aspect-[16/10] rounded-xl overflow-hidden bg-white border border-[#E7EDF3]">
                         <img
-<<<<<<< HEAD
                           src={prop.coverImage || prop.images[0] || getAccommodationFallback(prop.category, prop.id)}
                           alt={prop.title}
                           onError={(e) => {
@@ -141,10 +137,6 @@ export default function ComparePage() {
                               e.currentTarget.src = fallback;
                             }
                           }}
-=======
-                          src={prop.coverImage || prop.images[0]}
-                          alt={prop.title}
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
                           className="w-full h-full object-cover"
                         />
                       </div>

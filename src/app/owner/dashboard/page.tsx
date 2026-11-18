@@ -4,10 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Property, Enquiry } from "@/types";
 import { formatPrice } from "@/lib/utils/formatters";
-<<<<<<< HEAD
 import { getAccommodationFallback } from "@/lib/utils/fallbackImages";
-=======
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 import {
   Building2,
   PlusCircle,
@@ -211,7 +208,6 @@ export default function OwnerDashboardPage() {
                       <td className="py-4">
                         <div className="flex items-center gap-3">
                           <img
-<<<<<<< HEAD
                             src={prop.coverImage || prop.images[0] || getAccommodationFallback(prop.category, prop.id)}
                             alt=""
                             onError={(e) => {
@@ -220,10 +216,6 @@ export default function OwnerDashboardPage() {
                                 e.currentTarget.src = fallback;
                               }
                             }}
-=======
-                            src={prop.coverImage || prop.images[0]}
-                            alt=""
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
                             className="w-12 h-12 rounded-xl object-cover shrink-0"
                           />
                           <div>

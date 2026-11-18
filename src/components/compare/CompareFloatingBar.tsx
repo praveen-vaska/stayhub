@@ -2,10 +2,7 @@
 
 import React from "react";
 import { useCompare } from "@/lib/compare/context";
-<<<<<<< HEAD
 import { getAccommodationFallback } from "@/lib/utils/fallbackImages";
-=======
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 import { X, ArrowRightLeft, Sparkles, Trash2 } from "lucide-react";
 
 interface CompareFloatingBarProps {
@@ -46,7 +43,6 @@ export default function CompareFloatingBar({ onOpenCompare }: CompareFloatingBar
                 className="flex items-center gap-1.5 bg-white/10 hover:bg-white/15 px-2 py-1 rounded-xl text-xs shrink-0 border border-white/10"
               >
                 <img
-<<<<<<< HEAD
                   src={prop.coverImage || prop.images[0] || getAccommodationFallback(prop.category, prop.id)}
                   alt=""
                   onError={(e) => {
@@ -55,10 +51,6 @@ export default function CompareFloatingBar({ onOpenCompare }: CompareFloatingBar
                       e.currentTarget.src = fallback;
                     }
                   }}
-=======
-                  src={prop.coverImage || prop.images[0]}
-                  alt=""
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
                   className="w-5 h-5 rounded-md object-cover"
                 />
                 <span className="text-[11px] font-medium max-w-[80px] sm:max-w-[100px] truncate text-white">

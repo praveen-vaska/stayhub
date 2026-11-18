@@ -3,7 +3,6 @@ import path from "path";
 
 const apiKey = "AIzaSyDKz_0zAacZlP2RgekuyPEz_dZ6ImtwIc4";
 
-<<<<<<< HEAD
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -110,33 +109,12 @@ async function fetchWithPagination(item, seenIds, allProperties) {
       const body = { textQuery: item.q, pageSize: 20 };
       if (pageToken) body.pageToken = pageToken;
 
-=======
-const queries = [
-  { q: "PG in Gachibowli Hyderabad", locality: "Gachibowli", city: "Hyderabad", cat: "PG" },
-  { q: "Hostels in Madhapur Hyderabad", locality: "Madhapur", city: "Hyderabad", cat: "Hostel" },
-  { q: "PG in Kondapur Hyderabad", locality: "Kondapur", city: "Hyderabad", cat: "PG" },
-  { q: "Hostels in Ameerpet Hyderabad", locality: "Ameerpet", city: "Hyderabad", cat: "Hostel" },
-  { q: "Coliving in Hitech City Hyderabad", locality: "Hitech City", city: "Hyderabad", cat: "PG" },
-  { q: "Hotels in Banjara Hills Hyderabad", locality: "Banjara Hills", city: "Hyderabad", cat: "Hotel" },
-  { q: "Hostels in Kukatpally Hyderabad", locality: "Kukatpally", city: "Hyderabad", cat: "Hostel" },
-  { q: "PG in Koramangala Bengaluru", locality: "Koramangala", city: "Bengaluru", cat: "PG" },
-];
-
-async function fetchAll() {
-  const allProperties = [];
-  const seenIds = new Set();
-
-  for (const item of queries) {
-    try {
-      console.log(`Fetching: ${item.q}...`);
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
       const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-Goog-Api-Key": apiKey,
           "X-Goog-FieldMask":
-<<<<<<< HEAD
             "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.internationalPhoneNumber,places.types,places.photos,nextPageToken",
         },
         body: JSON.stringify(body),
@@ -151,22 +129,11 @@ async function fetchAll() {
       const d = await res.json();
       pageToken = d.nextPageToken || null;
 
-=======
-            "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.internationalPhoneNumber,places.types,places.photos",
-        },
-        body: JSON.stringify({ textQuery: item.q, pageSize: 8 }),
-      });
-
-      const d = await res.json();
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
       if (d.places && Array.isArray(d.places)) {
         for (const p of d.places) {
           if (seenIds.has(p.id)) continue;
           seenIds.add(p.id);
-<<<<<<< HEAD
           fetched++;
-=======
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 
           const title = p.displayName?.text || "Stay Accommodation";
           const lowerTitle = title.toLowerCase();
@@ -175,7 +142,6 @@ async function fetchAll() {
           const pincode = pinMatch ? pinMatch[0] : "500032";
 
           let category = item.cat;
-<<<<<<< HEAD
           if (lowerTitle.includes("hotel") || lowerTitle.includes("suites") || lowerTitle.includes("inn") || lowerTitle.includes("resort")) category = "Hotel";
           else if (lowerTitle.includes("hostel") || lowerTitle.includes("dormitory")) category = "Hostel";
           else if (lowerTitle.includes("lodge") || lowerTitle.includes("guest house") || lowerTitle.includes("guesthouse")) category = "Lodge";
@@ -186,36 +152,18 @@ async function fetchAll() {
           if (lowerTitle.includes("women") || lowerTitle.includes("ladies") || lowerTitle.includes("girls") || lowerTitle.includes("female")) genderPreference = "Girls";
           else if (lowerTitle.includes("men") || lowerTitle.includes("gents") || lowerTitle.includes("boys") || lowerTitle.includes("male")) genderPreference = "Boys";
           else if (lowerTitle.includes("coliving") || lowerTitle.includes("co-living") || lowerTitle.includes("unisex") || lowerTitle.includes("coed")) genderPreference = "Unisex";
-=======
-          if (lowerTitle.includes("hotel") || lowerTitle.includes("suites")) category = "Hotel";
-          else if (lowerTitle.includes("hostel")) category = "Hostel";
-          else if (lowerTitle.includes("lodge")) category = "Lodge";
-          else if (lowerTitle.includes("pg") || lowerTitle.includes("paying guest")) category = "PG";
-
-          let genderPreference = "Any";
-          if (lowerTitle.includes("women") || lowerTitle.includes("ladies") || lowerTitle.includes("girls")) genderPreference = "Girls";
-          else if (lowerTitle.includes("men") || lowerTitle.includes("gents") || lowerTitle.includes("boys")) genderPreference = "Boys";
-          else if (lowerTitle.includes("coliving") || lowerTitle.includes("unisex")) genderPreference = "Unisex";
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 
           let price = 8500;
           let pricingType = "monthly";
           if (category === "Hotel") { price = 2499; pricingType = "daily"; }
           else if (category === "Lodge") { price = 1299; pricingType = "daily"; }
           else if (category === "Hostel") { price = 6000; pricingType = "monthly"; }
-<<<<<<< HEAD
           else if (category === "Apartment") { price = 15000; pricingType = "monthly"; }
           else if (lowerTitle.includes("luxury") || lowerTitle.includes("executive") || lowerTitle.includes("premium")) price = 12000;
           else if (lowerTitle.includes("affordable") || lowerTitle.includes("budget")) price = 5500;
 
           const images = (p.photos && p.photos.length > 0)
             ? p.photos.slice(0, 5).map((ph) => `/api/places-photo?name=${encodeURIComponent(ph.name)}`)
-=======
-          else if (lowerTitle.includes("luxury") || lowerTitle.includes("executive")) price = 12000;
-
-          const images = (p.photos && p.photos.length > 0)
-            ? p.photos.slice(0, 4).map((ph) => `/api/places-photo?name=${encodeURIComponent(ph.name)}`)
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
             : [
                 "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1200&q=80",
                 "https://images.unsplash.com/photo-1522770179533-24471fcdba45?auto=format&fit=crop&w=1200&q=80",
@@ -224,7 +172,6 @@ async function fetchAll() {
           const slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${p.id.substring(0, 8)}`;
           const phone = p.internationalPhoneNumber || "+91 90590 30142";
 
-<<<<<<< HEAD
           const amenitiesBase = [
             "High-Speed Wi-Fi", "Air Conditioning", "Power Backup",
             "CCTV Surveillance", "RO Drinking Water", "Geyser / Hot Water",
@@ -233,26 +180,16 @@ async function fetchAll() {
           if (category !== "Hotel") amenitiesBase.push("Three Meals Included", "Daily Housekeeping", "Washing Machine / Laundry");
           if (category === "Hotel") amenitiesBase.push("Room Service", "24x7 Reception");
 
-=======
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
           allProperties.push({
             id: `gplace_${p.id}`,
             title,
             slug,
             category,
-<<<<<<< HEAD
             description: `${title} is a verified business on Google Maps located at ${address}. Featuring quality accommodation with high-speed Wi-Fi, round-the-clock water and power backup, modern amenities, and prime connectivity to major IT hubs and metro stations.`,
             images,
             coverImage: images[0],
             country: "India",
             state: item.state,
-=======
-            description: `${title} is a verified business on Google Maps located at ${address}. Featuring quality accommodation with high-speed Wi-Fi, round-the-clock water and power backup, modern amenities, and prime connectivity.`,
-            images,
-            coverImage: images[0],
-            country: "India",
-            state: item.city === "Bengaluru" ? "Karnataka" : "Telangana",
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
             city: item.city,
             locality: item.locality,
             address,
@@ -268,33 +205,13 @@ async function fetchAll() {
             genderPreference,
             furnishingStatus: "Furnished",
             roomTypes: [
-<<<<<<< HEAD
               { name: "Single Sharing Room", sharing: "Single", price: Math.round(price * 1.5), available: 2, total: 8 },
-=======
-              { name: "Single Sharing Room", sharing: "Single", price: price * 1.5, available: 2, total: 8 },
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
               { name: "Double Sharing Room", sharing: "Double", price, available: 4, total: 16 },
               { name: "Triple Sharing Room", sharing: "Triple", price: Math.round(price * 0.75), available: 6, total: 24 },
             ],
             totalRooms: 15,
             availableBeds: 12,
-<<<<<<< HEAD
             amenities: amenitiesBase,
-=======
-            amenities: [
-              "High-Speed Wi-Fi",
-              category === "Hotel" ? "Air Conditioning" : "Three Meals Included",
-              "Air Conditioning",
-              "Two-Wheeler Parking",
-              "Attached Bathroom",
-              "Power Backup",
-              "CCTV Surveillance",
-              "Daily Housekeeping",
-              "Washing Machine / Laundry",
-              "RO Drinking Water",
-              "Geyser / Hot Water",
-            ],
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
             rules: [
               "Government ID mandatory at check-in",
               "Main gate closes at 10:30 PM",
@@ -306,11 +223,7 @@ async function fetchAll() {
               name: `${title} Front Desk`,
               phone,
               whatsapp: phone.replace(/[^0-9]/g, ""),
-<<<<<<< HEAD
               email: `info@${slug.substring(0, 30)}.com`,
-=======
-              email: `info@${slug}.com`,
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
             },
             rating: p.rating || 4.4,
             reviewCount: p.userRatingCount || 45,
@@ -323,7 +236,6 @@ async function fetchAll() {
           });
         }
       }
-<<<<<<< HEAD
 
       pageNum++;
       if (pageToken && pageNum < 3) await sleep(2000);
@@ -364,16 +276,3 @@ async function fetchAll() {
 }
 
 fetchAll().catch(console.error);
-=======
-    } catch (err) {
-      console.error(`Error fetching ${item.q}:`, err);
-    }
-  }
-
-  console.log(`Successfully fetched ${allProperties.length} verified real Google Places properties!`);
-  fs.writeFileSync("src/lib/db/googlePlacesData.json", JSON.stringify(allProperties, null, 2));
-  console.log("Saved to src/lib/db/googlePlacesData.json");
-}
-
-fetchAll();
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394

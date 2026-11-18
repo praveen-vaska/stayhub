@@ -1,17 +1,10 @@
 "use client";
 
-<<<<<<< HEAD
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Property } from "@/types";
 import { formatPrice } from "@/lib/utils/formatters";
 import { getAccommodationFallback } from "@/lib/utils/fallbackImages";
-=======
-import React, { useState } from "react";
-import Link from "next/link";
-import { Property } from "@/types";
-import { formatPrice } from "@/lib/utils/formatters";
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 import { useAuth } from "@/lib/auth/context";
 import { useCompare } from "@/lib/compare/context";
 import {
@@ -28,7 +21,6 @@ import {
   Check,
 } from "lucide-react";
 
-<<<<<<< HEAD
 // ─── Beautiful Shimmer Skeleton Card ──────────────────────────────────────────
 export function PropertyCardSkeleton() {
   return (
@@ -84,8 +76,6 @@ export function PropertyCardSkeleton() {
 
 // ─── Main Property Card ───────────────────────────────────────────────────────
 
-=======
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 interface PropertyCardProps {
   property: Property;
   onContactClick?: (property: Property) => void;
@@ -97,7 +87,6 @@ export default function PropertyCard({ property, onContactClick }: PropertyCardP
   const { isInCompare, toggleCompare } = useCompare();
   const [saved, setSaved] = useState(isWishlisted(property.id));
   const inCompare = isInCompare(property.id);
-<<<<<<< HEAD
   const [imgLoaded, setImgLoaded] = useState(false);
 
   const fallbackImg = getAccommodationFallback(property.category, property.id);
@@ -109,8 +98,6 @@ export default function PropertyCard({ property, onContactClick }: PropertyCardP
     setImgLoaded(false);
     setImgSrc(property.coverImage || (property.images && property.images[0]) || fallbackImg);
   }, [property.coverImage, property.images, property.category, property.id, fallbackImg]);
-=======
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
 
   const handleHeartClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -156,7 +143,6 @@ export default function PropertyCard({ property, onContactClick }: PropertyCardP
       <div>
         {/* Image Container */}
         <div className="relative aspect-[16/10] overflow-hidden bg-[#F7F8FA]">
-<<<<<<< HEAD
           {/* Shimmer shown while image is loading */}
           {!imgLoaded && (
             <div className="absolute inset-0 skeleton z-[1]" />
@@ -175,13 +161,6 @@ export default function PropertyCard({ property, onContactClick }: PropertyCardP
             className={`w-full h-full object-cover group-hover:scale-110 transition-all duration-700 ease-out ${
               imgLoaded ? "opacity-100" : "opacity-0"
             }`}
-=======
-          <img
-            src={property.coverImage || property.images[0]}
-            alt={property.title}
-            loading="lazy"
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
 
@@ -223,11 +202,7 @@ export default function PropertyCard({ property, onContactClick }: PropertyCardP
           </button>
 
           {/* Availability Tag */}
-<<<<<<< HEAD
           <div className="absolute bottom-2.5 left-2.5 bg-[#142D4E]/90 backdrop-blur-md text-white text-[11px] font-semibold px-2 py-0.5 rounded-md flex items-center gap-1.5 z-10">
-=======
-          <div className="absolute bottom-2.5 left-2.5 bg-[#142D4E]/90 backdrop-blur-md text-white text-[11px] font-semibold px-2 py-0.5 rounded-md flex items-center gap-1.5">
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
             <span className="w-1.5 h-1.5 rounded-full bg-[#159A91]" />
             {property.availableBeds > 0 ? `${property.availableBeds} beds available` : "Enquire for availability"}
           </div>
@@ -261,42 +236,24 @@ export default function PropertyCard({ property, onContactClick }: PropertyCardP
             </h3>
           </Link>
 
-<<<<<<< HEAD
           {/* Amenities Mini-Row */}
           <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-[#667A91] py-2.5 border-y border-[#E7EDF3]">
             {(property.amenities.includes("Wi-Fi") || property.amenities.includes("High-Speed Wi-Fi")) && (
-=======
-          {/* Amenities Mini-Row — each chip stays on one line, row wraps if narrow */}
-          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-[#667A91] py-2.5 border-y border-[#E7EDF3]">
-            {property.amenities.includes("Wi-Fi") && (
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
               <span className="flex items-center gap-1 whitespace-nowrap" title="High speed Wi-Fi">
                 <Wifi className="w-3.5 h-3.5 text-slate-400 shrink-0" /> Wi‑Fi
               </span>
             )}
-<<<<<<< HEAD
             {(property.amenities.includes("Food") || property.amenities.includes("Three Meals Included")) && (
-=======
-            {property.amenities.includes("Food") && (
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
               <span className="flex items-center gap-1 whitespace-nowrap" title="Meals included / available">
                 <Utensils className="w-3.5 h-3.5 text-slate-400 shrink-0" /> Meals
               </span>
             )}
-<<<<<<< HEAD
             {(property.amenities.includes("AC") || property.amenities.includes("Air Conditioning")) && (
-=======
-            {property.amenities.includes("AC") && (
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
               <span className="flex items-center gap-1 whitespace-nowrap" title="Air Conditioned">
                 <Wind className="w-3.5 h-3.5 text-slate-400 shrink-0" /> AC
               </span>
             )}
-<<<<<<< HEAD
             {(property.amenities.includes("Parking") || property.amenities.includes("Two-Wheeler Parking")) && (
-=======
-            {property.amenities.includes("Parking") && (
->>>>>>> 2e32adefb2353464bd29d1352c97d9b868300394
               <span className="flex items-center gap-1 whitespace-nowrap" title="Parking available">
                 <Car className="w-3.5 h-3.5 text-slate-400 shrink-0" /> Parking
               </span>
