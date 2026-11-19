@@ -584,23 +584,10 @@ export const db = {
   },
 
   addGoogleProperties(props: Property[]) {
-    let added = false;
     for (const p of props) {
       if (!store.properties.some((existing) => existing.id === p.id || existing.slug === p.slug)) {
         store.properties.push(p);
-        added = true;
       }
-    }
-    if (added && typeof window === "undefined") {
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const fs = require("fs");
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const path = require("path");
-        const filePath = path.join(process.cwd(), "src/lib/db/googlePlacesData.json");
-        const googleProps = store.properties.filter((x) => x.id.startsWith("gplace_"));
-        fs.promises.writeFile(filePath, JSON.stringify(googleProps, null, 2)).catch(() => {});
-      } catch {}
     }
   },
 

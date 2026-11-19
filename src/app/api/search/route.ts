@@ -42,11 +42,41 @@ export async function GET(request: Request) {
           .trim()
       : undefined;
 
-    // Seamlessly query Google Places API (New) if API key is present
-    let googleIds: string[] = [];
-    if (process.env.GOOGLE_PLACES_API_KEY && (cityParam || localityParam || sanitizedSearchQuery)) {
-      const cacheKey = JSON.stringify([cityParam, localityParam, categoryParam, sanitizedSearchQuery?.toLowerCase()]);
+    // 1. Query indexed properties from database (instant in-memory search)
+    let result = db.getProperties({
+      city,
+      locality,
+      category,
+      minPrice,
+      maxPrice,
+      genderPreference,
+      furnishingStatus,
+      sharingType,
+      rating,
+      availableNow,
+      searchQuery,
+      sort,
+      userLat,
+      userLng,
+      lat: userLat,
+      lng: userLng,
+      radiusKm,
+      page,
+      limit,
+      amenities: amenities.length > 0 ? amenities : undefined,
+    });
+
+    // 2. If results are low (< 4) and user searched a specific query (>= 3 chars), discover live places via Google
+    if (
+      result.total < 4 &&
+      process.env.GOOGLE_PLACES_API_KEY &&
+      sanitizedSearchQuery &&
+      sanitizedSearchQuery.length >= 3
+    ) {
+      const cacheKey = JSON.stringify([cityParam, localityParam, categoryParam, sanitizedSearchQuery.toLowerCase()]);
       const cached = placesCache.get(cacheKey);
+      let googleIds: string[] = [];
+
       if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
         googleIds = cached.ids;
       } else {
@@ -61,39 +91,40 @@ export async function GET(request: Request) {
 
           if (livePlaces.length > 0) {
             db.addGoogleProperties(livePlaces);
+            googleIds = livePlaces.map((p) => p.id);
+            placesCache.set(cacheKey, { at: Date.now(), ids: googleIds });
           }
-          googleIds = livePlaces.map((p) => p.id);
-          placesCache.set(cacheKey, { at: Date.now(), ids: googleIds });
         } catch (placeErr) {
           console.warn("Google Places fetch non-critical warning:", placeErr);
         }
       }
-    }
 
-    const result = db.getProperties({
-      city,
-      locality,
-      category,
-      minPrice,
-      maxPrice,
-      genderPreference,
-      furnishingStatus,
-      sharingType,
-      rating,
-      availableNow,
-      searchQuery,
-      // Google already matched these to the query; keep them even if the wording differs
-      includeIds: googleIds,
-      sort,
-      userLat,
-      userLng,
-      lat: userLat,
-      lng: userLng,
-      radiusKm,
-      page,
-      limit,
-      amenities: amenities.length > 0 ? amenities : undefined,
-    });
+      if (googleIds.length > 0) {
+        result = db.getProperties({
+          city,
+          locality,
+          category,
+          minPrice,
+          maxPrice,
+          genderPreference,
+          furnishingStatus,
+          sharingType,
+          rating,
+          availableNow,
+          searchQuery,
+          includeIds: googleIds,
+          sort,
+          userLat,
+          userLng,
+          lat: userLat,
+          lng: userLng,
+          radiusKm,
+          page,
+          limit,
+          amenities: amenities.length > 0 ? amenities : undefined,
+        });
+      }
+    }
 
     return NextResponse.json(result);
   } catch (error: any) {
