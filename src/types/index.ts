@@ -72,6 +72,7 @@ export interface Property {
   approvalStatus: ApprovalStatus;
   rejectionReason?: string;
   isFeatured?: boolean;
+  distanceKm?: number;
   ownerId: string;
   ownerName?: string;
   createdAt: string;

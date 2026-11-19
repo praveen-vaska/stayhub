@@ -22,6 +22,9 @@ export async function GET(request: Request) {
     const availableNow = searchParams.get("availableNow") === "true";
     const searchQuery = searchParams.get("q") || searchParams.get("searchQuery") || undefined;
     const sort = (searchParams.get("sort") as any) || "recommended";
+    const userLat = searchParams.get("lat") ? Number(searchParams.get("lat")) : undefined;
+    const userLng = searchParams.get("lng") ? Number(searchParams.get("lng")) : undefined;
+    const radiusKm = searchParams.get("radiusKm") ? Number(searchParams.get("radiusKm")) : undefined;
     const page = searchParams.get("page") ? Number(searchParams.get("page")) : 1;
     const limit = searchParams.get("limit") ? Number(searchParams.get("limit")) : 12;
     const amenities = searchParams.getAll("amenity");
@@ -30,10 +33,19 @@ export async function GET(request: Request) {
     const localityParam = locality && locality !== "All" ? locality : undefined;
     const categoryParam = category && category !== "All" ? category : undefined;
 
+    // Sanitize common typos before hitting Google Places (e.g. srre -> sree)
+    const sanitizedSearchQuery = searchQuery
+      ? searchQuery
+          .replace(/\b(srre|sre|sreee|srie)\b/gi, "sree")
+          .replace(/\b(hostle|hostal)\b/gi, "hostel")
+          .replace(/\b(gachoiboli|gachobli|gachobliw)\b/gi, "gachibowli")
+          .trim()
+      : undefined;
+
     // Seamlessly query Google Places API (New) if API key is present
     let googleIds: string[] = [];
-    if (process.env.GOOGLE_PLACES_API_KEY && (cityParam || localityParam || searchQuery)) {
-      const cacheKey = JSON.stringify([cityParam, localityParam, categoryParam, searchQuery?.toLowerCase().trim()]);
+    if (process.env.GOOGLE_PLACES_API_KEY && (cityParam || localityParam || sanitizedSearchQuery)) {
+      const cacheKey = JSON.stringify([cityParam, localityParam, categoryParam, sanitizedSearchQuery?.toLowerCase()]);
       const cached = placesCache.get(cacheKey);
       if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
         googleIds = cached.ids;
@@ -43,7 +55,7 @@ export async function GET(request: Request) {
             city: cityParam,
             locality: localityParam,
             category: categoryParam,
-            query: searchQuery,
+            query: sanitizedSearchQuery,
             limit: 20,
           });
 
@@ -73,6 +85,11 @@ export async function GET(request: Request) {
       // Google already matched these to the query; keep them even if the wording differs
       includeIds: googleIds,
       sort,
+      userLat,
+      userLng,
+      lat: userLat,
+      lng: userLng,
+      radiusKm,
       page,
       limit,
       amenities: amenities.length > 0 ? amenities : undefined,

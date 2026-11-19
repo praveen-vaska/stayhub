@@ -22,6 +22,7 @@ import {
   Star,
   Clock,
   MapPin,
+  Navigation,
 } from "lucide-react";
 import FancySelect, { type FancyOption } from "@/components/common/FancySelect";
 
@@ -36,10 +37,14 @@ interface TopFilterBarProps {
   /** Free-text search (property name, locality, address). */
   query: string;
   onQueryChange: (q: string) => void;
+  onNearMeClick?: () => void;
+  isLocating?: boolean;
+  hasUserLocation?: boolean;
 }
 
 const SORT_OPTIONS: FancyOption[] = [
-  { value: "recommended", label: "Recommended", hint: "Best match & featured", icon: Sparkles },
+  { value: "recommended", label: "Recommended", hint: "Best match & proximity", icon: Sparkles },
+  { value: "distance_asc", label: "Distance: Nearest First", hint: "Closest to you", icon: MapPin },
   { value: "price_asc", label: "Price: Low to High", hint: "Cheapest first", icon: TrendingUp },
   { value: "price_desc", label: "Price: High to Low", hint: "Premium first", icon: TrendingDown },
   { value: "rating_desc", label: "Highest Rated", hint: "Top reviewed stays", icon: Star },
@@ -66,6 +71,9 @@ export default function TopFilterBar({
   onOpenMobileFilters,
   query,
   onQueryChange,
+  onNearMeClick,
+  isLocating,
+  hasUserLocation,
 }: TopFilterBarProps) {
   const router = useRouter();
   // Local input state, debounced into the parent so typing feels instant
@@ -234,6 +242,25 @@ export default function TopFilterBar({
         </div>
 
         <div className="flex items-center justify-between md:justify-end gap-2">
+          {/* Near Me / Proximity Quick-Action Button */}
+          {onNearMeClick && (
+            <button
+              type="button"
+              onClick={onNearMeClick}
+              disabled={isLocating}
+              className={`flex items-center gap-1.5 h-11 px-3 sm:px-3.5 rounded-xl border text-xs font-bold transition-all shadow-xs active:scale-95 whitespace-nowrap ${
+                hasUserLocation
+                  ? "bg-[#E8F5F4] text-[#159A91] border-[#159A91]/50 ring-2 ring-[#159A91]/20 font-extrabold"
+                  : "bg-[#F7F8FA] text-[#142D4E] border-[#E7EDF3] hover:border-[#159A91]/50 hover:text-[#159A91]"
+              }`}
+              title="Sort stays closest to your current location"
+            >
+              <Navigation className={`w-3.5 h-3.5 text-[#159A91] shrink-0 ${isLocating ? "animate-spin" : ""}`} />
+              <span className="hidden xs:inline sm:inline">{isLocating ? "Locating..." : hasUserLocation ? "Nearby Active" : "Near Me"}</span>
+              <span className="xs:hidden sm:hidden">Near</span>
+            </button>
+          )}
+
           <button
             onClick={onOpenMobileFilters}
             className="lg:hidden flex items-center gap-1.5 h-11 px-3.5 rounded-xl bg-[#F7F8FA] border border-[#E7EDF3] text-xs font-bold text-[#142D4E] whitespace-nowrap"

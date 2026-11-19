@@ -151,10 +151,12 @@ export interface PropertyFilterParams {
   rating?: number;
   availableNow?: boolean;
   searchQuery?: string;
-  sort?: "recommended" | "price_asc" | "price_desc" | "rating_desc" | "newest";
+  sort?: "recommended" | "price_asc" | "price_desc" | "rating_desc" | "newest" | "distance_asc" | "nearby";
   lat?: number;
   lng?: number;
   radiusKm?: number;
+  userLat?: number;
+  userLng?: number;
   page?: number;
   limit?: number;
   includeAllStatus?: boolean; // For admin/owner
@@ -163,13 +165,103 @@ export interface PropertyFilterParams {
   includeIds?: string[];
 }
 
-/** Lowercase, strip punctuation, and unify common spelling variants (sree→sri, paying guest→pg). */
+// Locality center coordinates for instant proximity sorting
+export const LOCALITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
+  gachibowli: { lat: 17.4401, lng: 78.3489 },
+  "anjaiah nagar": { lat: 17.4468, lng: 78.3653 },
+  "siddiq nagar": { lat: 17.4510, lng: 78.3690 },
+  "kothaguda": { lat: 17.4600, lng: 78.3640 },
+  madhapur: { lat: 17.4483, lng: 78.3915 },
+  kondapur: { lat: 17.4699, lng: 78.3578 },
+  "hitech city": { lat: 17.4435, lng: 78.3772 },
+  kukatpally: { lat: 17.4849, lng: 78.4138 },
+  ameerpet: { lat: 17.4375, lng: 78.4482 },
+  "banjara hills": { lat: 17.4156, lng: 78.4357 },
+  "jubilee hills": { lat: 17.4319, lng: 78.4073 },
+  miyapur: { lat: 17.4968, lng: 78.3614 },
+  dilsukhnagar: { lat: 17.3688, lng: 78.5247 },
+  uppal: { lat: 17.4018, lng: 78.5602 },
+  "financial district": { lat: 17.4156, lng: 78.3427 },
+  nanakramguda: { lat: 17.4182, lng: 78.3466 },
+  kokapet: { lat: 17.4042, lng: 78.3312 },
+  "hafeezpet": { lat: 17.4880, lng: 78.3490 },
+  "manikonda": { lat: 17.3995, lng: 78.3778 },
+  "raidurg": { lat: 17.4285, lng: 78.3795 },
+  "hsr layout": { lat: 12.9121, lng: 77.6446 },
+  koramangala: { lat: 12.9352, lng: 77.6245 },
+  whitefield: { lat: 12.9698, lng: 77.7500 },
+  bellandur: { lat: 12.9304, lng: 77.6784 },
+  indiranagar: { lat: 12.9784, lng: 77.6408 },
+  "electronic city": { lat: 12.8452, lng: 77.6602 },
+  "btm layout": { lat: 12.9166, lng: 77.6101 },
+  "marathahalli": { lat: 12.9591, lng: 77.6974 },
+  "jayanagar": { lat: 12.9308, lng: 77.5838 },
+  "sarjapur road": { lat: 12.9100, lng: 77.6850 },
+  velachery: { lat: 12.9815, lng: 80.2180 },
+  sholinganallur: { lat: 12.8821, lng: 80.2282 },
+  hinjewadi: { lat: 18.5913, lng: 73.7389 },
+  andheri: { lat: 19.1136, lng: 72.8697 },
+};
+
+// City center reference coordinates (defaulting to the primary IT & living corridor in each city)
+export const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
+  hyderabad: { lat: 17.4401, lng: 78.3489 },
+  bengaluru: { lat: 12.9352, lng: 77.6245 },
+  bangalore: { lat: 12.9352, lng: 77.6245 },
+  chennai: { lat: 12.9815, lng: 80.2180 },
+  pune: { lat: 18.5913, lng: 73.7389 },
+  mumbai: { lat: 19.1136, lng: 72.8697 },
+  delhi: { lat: 28.5355, lng: 77.2090 },
+  noida: { lat: 28.5700, lng: 77.3200 },
+  gurgaon: { lat: 28.4595, lng: 77.0266 },
+};
+
+/** Compute Levenshtein distance for fuzzy typo tolerance */
+function levenshtein(a: string, b: string): number {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  const v0 = new Array(b.length + 1);
+  const v1 = new Array(b.length + 1);
+  for (let i = 0; i <= b.length; i++) v0[i] = i;
+  for (let i = 0; i < a.length; i++) {
+    v1[0] = i + 1;
+    for (let j = 0; j < b.length; j++) {
+      const cost = a[i] === b[j] ? 0 : 1;
+      v1[j + 1] = Math.min(v1[j] + 1, v0[j + 1] + 1, v0[j] + cost);
+    }
+    for (let j = 0; j <= b.length; j++) v0[j] = v1[j];
+  }
+  return v1[b.length];
+}
+
+/** Check if token matches word with substring or single-character typo tolerance */
+function tokenMatches(token: string, targetText: string): boolean {
+  if (targetText.includes(token)) return true;
+  if (token.length >= 4) {
+    const words = targetText.split(" ");
+    for (const w of words) {
+      if (w.length >= 3 && Math.abs(w.length - token.length) <= 1) {
+        if (levenshtein(token, w) <= 1) return true;
+      }
+    }
+  }
+  return false;
+}
+
+/** Lowercase, strip punctuation, and normalize common Indian accommodation typos and variants (srre/sree→sri, hostle→hostel). */
 function normalizeText(s: string) {
   return s
     .toLowerCase()
     .replace(/paying\s+guest/g, "pg")
     .replace(/[^a-z0-9\s]/g, " ")
-    .replace(/\b(sree|shri|shree)\b/g, "sri")
+    .replace(/\b(sree|shri|shree|srre|sre|sreee|srie)\b/gi, "sri")
+    .replace(/\b(hostle|hostal|hostels|hostelz)\b/gi, "hostel")
+    .replace(/\b(pgs|p\.g\.|p\.g)\b/gi, "pg")
+    .replace(/\b(gachibowly|gachoiboli|gachobli|gachobliw|gachibowlli)\b/gi, "gachibowli")
+    .replace(/\b(kondapoor|kondapurr)\b/gi, "kondapur")
+    .replace(/\b(madhapoor|madhapurr)\b/gi, "madhapur")
+    .replace(/\b(kukatpaly)\b/gi, "kukatpally")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -268,22 +360,23 @@ export const db = {
           return true;
         }
 
-        // 2. Exact full phrase match in address or locality (e.g. "anjaiah nagar", "dlf cyber city")
+        // 2. All significant content tokens present in title (e.g. "sri" and "durga" in "Sree Durga Men's Luxury PG")
+        if (searchTokens.length > 0 && searchTokens.every((t) => tokenMatches(t, title))) {
+          const catBoost = hasCategoryIntent && (category.includes("pg") || title.includes("pg") || category.includes("hostel")) ? 2 : 0;
+          relevance.set(p.id, 9 + catBoost);
+          return true;
+        }
+
+        // 3. Exact full phrase match in address or locality (e.g. "anjaiah nagar", "dlf cyber city")
         if (address.includes(normalized) || locality.includes(normalized)) {
           relevance.set(p.id, 8);
           return true;
         }
 
-        // 3. All significant content tokens present in title
-        if (searchTokens.length > 0 && searchTokens.every((t) => title.includes(t))) {
-          relevance.set(p.id, 7);
-          return true;
-        }
-
-        // 4. All significant content tokens present in address/locality/category
-        if (searchTokens.length > 0 && searchTokens.every((t) => haystack.includes(t))) {
+        // 4. All significant content tokens present in address/locality/category (with typo tolerance)
+        if (searchTokens.length > 0 && searchTokens.every((t) => tokenMatches(t, haystack))) {
           const catBoost = hasCategoryIntent && (category.includes("pg") || title.includes("pg") || category.includes("hostel")) ? 1 : 0;
-          relevance.set(p.id, 5 + catBoost);
+          relevance.set(p.id, 6 + catBoost);
           return true;
         }
 
@@ -335,13 +428,54 @@ export const db = {
       list = list.filter((p) => p.availableBeds > 0);
     }
 
-    // Geospatial distance filter if lat & lng provided
-    if (params.lat && params.lng) {
-      const radius = params.radiusKm || 15; // default 15km
-      list = list.filter((p) => {
-        const d = calculateDistance(params.lat!, params.lng!, p.coordinates.lat, p.coordinates.lng);
-        return d <= radius;
+    // Auto-detect locality reference coordinates from search query if user mentions an area
+    let queryLocalityCoord: { lat: number; lng: number } | undefined = undefined;
+    if (params.searchQuery) {
+      const qLower = params.searchQuery.toLowerCase();
+      for (const [locName, coords] of Object.entries(LOCALITY_COORDINATES)) {
+        if (qLower.includes(locName)) {
+          queryLocalityCoord = coords;
+          break;
+        }
+      }
+    }
+
+    // Determine reference coordinates for distance calculations and proximity sorting
+    const refLat =
+      params.userLat ??
+      params.lat ??
+      queryLocalityCoord?.lat ??
+      (params.locality && params.locality !== "All"
+        ? LOCALITY_COORDINATES[params.locality.toLowerCase().trim()]?.lat
+        : undefined) ??
+      (params.city && params.city !== "All"
+        ? CITY_COORDINATES[params.city.toLowerCase().trim()]?.lat
+        : undefined);
+
+    const refLng =
+      params.userLng ??
+      params.lng ??
+      queryLocalityCoord?.lng ??
+      (params.locality && params.locality !== "All"
+        ? LOCALITY_COORDINATES[params.locality.toLowerCase().trim()]?.lng
+        : undefined) ??
+      (params.city && params.city !== "All"
+        ? CITY_COORDINATES[params.city.toLowerCase().trim()]?.lng
+        : undefined);
+
+    // Annotate properties with distance in km whenever reference coordinates are available
+    if (refLat !== undefined && refLng !== undefined) {
+      list.forEach((p) => {
+        if (p.coordinates?.lat && p.coordinates?.lng) {
+          const d = calculateDistance(refLat, refLng, p.coordinates.lat, p.coordinates.lng);
+          p.distanceKm = Math.round(d * 10) / 10;
+        }
       });
+    }
+
+    // Radius filter (only if radiusKm is explicitly specified)
+    if (params.radiusKm && refLat !== undefined && refLng !== undefined) {
+      list = list.filter((p) => (p.distanceKm ?? 9999) <= params.radiusKm!);
     }
 
     // Sorting
@@ -358,12 +492,34 @@ export const db = {
       case "newest":
         list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         break;
+      case "distance_asc":
+      case "nearby":
+        list.sort((a, b) => {
+          const distA = a.distanceKm ?? 9999;
+          const distB = b.distanceKm ?? 9999;
+          if (distA !== distB) return distA - distB;
+          return b.rating - a.rating;
+        });
+        break;
       case "recommended":
       default:
-        // Best text match first (when searching), then featured, then highest rating
+        // 1. Text relevance first
         list.sort((a, b) => {
-          const rel = (relevance.get(b.id) ?? 0) - (relevance.get(a.id) ?? 0);
-          if (rel !== 0) return rel;
+          const relA = relevance.get(a.id) ?? 0;
+          const relB = relevance.get(b.id) ?? 0;
+          const relDiff = relB - relA;
+
+          // If there's a strong relevance gap (e.g. title match vs vague match)
+          if (Math.abs(relDiff) >= 3) return relDiff;
+
+          // 2. Nearest stays to user's location come first!
+          if (refLat !== undefined && refLng !== undefined) {
+            const distA = a.distanceKm ?? 9999;
+            const distB = b.distanceKm ?? 9999;
+            if (distA !== distB) return distA - distB;
+          }
+
+          if (relDiff !== 0) return relDiff;
           if (a.isFeatured && !b.isFeatured) return -1;
           if (!a.isFeatured && b.isFeatured) return 1;
           return b.rating - a.rating;
@@ -428,10 +584,23 @@ export const db = {
   },
 
   addGoogleProperties(props: Property[]) {
+    let added = false;
     for (const p of props) {
       if (!store.properties.some((existing) => existing.id === p.id || existing.slug === p.slug)) {
         store.properties.push(p);
+        added = true;
       }
+    }
+    if (added && typeof window === "undefined") {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const fs = require("fs");
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const path = require("path");
+        const filePath = path.join(process.cwd(), "src/lib/db/googlePlacesData.json");
+        const googleProps = store.properties.filter((x) => x.id.startsWith("gplace_"));
+        fs.promises.writeFile(filePath, JSON.stringify(googleProps, null, 2)).catch(() => {});
+      } catch {}
     }
   },
 
@@ -461,15 +630,19 @@ export const db = {
   },
 
   searchLocations(query: string): LocationSuggestion[] {
-    const q = query.toLowerCase().trim();
-    if (!q || q.length < 2) return [];
+    const rawQ = query.trim();
+    if (!rawQ || rawQ.length < 2) return [];
+    const q = rawQ.toLowerCase();
+    const qNorm = normalizeText(rawQ);
+    const qTokens = qNorm.split(" ").filter(Boolean);
 
     const results: LocationSuggestion[] = [];
     const seen = new Set<string>();
 
     // 1. Check Cities
     store.cities.forEach((c) => {
-      if (c.name.toLowerCase().includes(q)) {
+      const cNorm = normalizeText(c.name);
+      if (cNorm.includes(qNorm) || c.name.toLowerCase().includes(q)) {
         const key = `city_${c.name.toLowerCase()}`;
         if (!seen.has(key)) {
           seen.add(key);
@@ -485,7 +658,8 @@ export const db = {
 
       // Check primary localities
       c.localities.forEach((loc) => {
-        if (loc.toLowerCase().includes(q)) {
+        const locNorm = normalizeText(loc);
+        if (locNorm.includes(qNorm) || loc.toLowerCase().includes(q)) {
           const key = `loc_${loc.toLowerCase()}`;
           if (!seen.has(key)) {
             seen.add(key);
@@ -502,10 +676,16 @@ export const db = {
       });
     });
 
-    // 2. Check Property Names (Direct match)
+    // 2. Check Property Names (Direct match & normalized typo match)
     for (const p of store.properties) {
       if (!p.title) continue;
-      if (p.title.toLowerCase().includes(q)) {
+      const titleNorm = normalizeText(p.title);
+      const isMatch =
+        p.title.toLowerCase().includes(q) ||
+        titleNorm.includes(qNorm) ||
+        (qTokens.length > 0 && qTokens.every((t) => tokenMatches(t, titleNorm)));
+
+      if (isMatch) {
         const key = `prop_${p.slug}`;
         if (!seen.has(key)) {
           seen.add(key);
@@ -522,7 +702,7 @@ export const db = {
           });
         }
       }
-      if (results.filter((r) => r.type === "property").length >= 4) break;
+      if (results.filter((r) => r.type === "property").length >= 6) break;
     }
 
     // 3. Extract Sub-localities, Colonies, Streets, and Landmarks from all addresses
@@ -531,8 +711,14 @@ export const db = {
       const parts = p.address.split(",").map((s) => s.trim());
       for (const part of parts) {
         const cleanPart = part.replace(/^(h\.?\s*no\.?|plot\s*no\.?|road\s*no\.?|near|opposite|opp\.?|behind|beside)\s*[:.]?\s*/i, "").trim();
+        const partNorm = normalizeText(cleanPart);
+        const isMatch =
+          cleanPart.toLowerCase().includes(q) ||
+          partNorm.includes(qNorm) ||
+          (qTokens.length > 0 && qTokens.every((t) => tokenMatches(t, partNorm)));
+
         if (
-          cleanPart.toLowerCase().includes(q) &&
+          isMatch &&
           cleanPart.length >= 3 &&
           !cleanPart.match(/^\d+$/) &&
           !cleanPart.match(/^50\d{4}$/) &&

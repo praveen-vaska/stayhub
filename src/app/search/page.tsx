@@ -23,6 +23,12 @@ function SearchPageContent() {
   // Free-text query (property name / area). A name search with no city covers all cities.
   const [query, setQuery] = useState(initialQuery);
 
+  const [userCoords, setUserCoords] = useState<{ lat?: number; lng?: number }>({
+    lat: searchParams.get("lat") ? Number(searchParams.get("lat")) : undefined,
+    lng: searchParams.get("lng") ? Number(searchParams.get("lng")) : undefined,
+  });
+  const [isLocating, setIsLocating] = useState(false);
+
   const [filters, setFilters] = useState<FilterState>({
     city: searchParams.get("city") || (initialQuery ? "All" : "Hyderabad"),
     locality: searchParams.get("locality") || "All",
@@ -48,6 +54,50 @@ function SearchPageContent() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isEnquiryModalOpen, setIsEnquiryModalOpen] = useState(false);
 
+  // Auto-detect browser location silently if already permitted
+  useEffect(() => {
+    if (typeof window !== "undefined" && navigator?.geolocation && !userCoords.lat) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        },
+        () => {},
+        { timeout: 6000, maximumAge: 300000 }
+      );
+    }
+  }, []);
+
+  const handleNearMe = useCallback(() => {
+    if (typeof window === "undefined" || !navigator?.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setIsLocating(false);
+        const { latitude, longitude } = pos.coords;
+        setUserCoords({ lat: latitude, lng: longitude });
+        setFilters((prev) => ({
+          ...prev,
+          sort: "distance_asc",
+          city: "All",
+          locality: "All",
+        }));
+        setPage(1);
+      },
+      (err) => {
+        setIsLocating(false);
+        console.warn("Geolocation fallback:", err.message);
+        // Fallback to Gachibowli / Anjaiah Nagar coordinates
+        setUserCoords({ lat: 17.4468, lng: 78.3653 });
+        setFilters((prev) => ({ ...prev, sort: "distance_asc" }));
+        setPage(1);
+      },
+      { timeout: 8000, enableHighAccuracy: true }
+    );
+  }, []);
+
   useEffect(() => {
     async function fetchProperties() {
       setLoading(true);
@@ -70,6 +120,10 @@ function SearchPageContent() {
         if (filters.rating > 0) params.set("rating", filters.rating.toString());
         if (filters.availableNow) params.set("availableNow", "true");
         if (filters.sort) params.set("sort", filters.sort);
+        if (userCoords.lat !== undefined && userCoords.lng !== undefined) {
+          params.set("lat", userCoords.lat.toString());
+          params.set("lng", userCoords.lng.toString());
+        }
         filters.amenities.forEach((a) => params.append("amenity", a));
         if (query) params.set("q", query);
         params.set("page", page.toString());
@@ -88,15 +142,19 @@ function SearchPageContent() {
     }
 
     fetchProperties();
-  }, [filters, page, query]);
+  }, [filters, page, query, userCoords]);
 
-  // Keep the URL shareable: reflect the text query without a navigation.
+  // Keep the URL shareable: reflect text query and coordinates without full reload.
   useEffect(() => {
     const url = new URL(window.location.href);
     if (query) url.searchParams.set("q", query);
     else url.searchParams.delete("q");
+    if (userCoords.lat !== undefined && userCoords.lng !== undefined) {
+      url.searchParams.set("lat", userCoords.lat.toString());
+      url.searchParams.set("lng", userCoords.lng.toString());
+    }
     window.history.replaceState(null, "", url.toString());
-  }, [query]);
+  }, [query, userCoords]);
 
   const handleQueryChange = useCallback((q: string) => {
     setQuery(q);
@@ -187,6 +245,9 @@ function SearchPageContent() {
           onOpenMobileFilters={() => setMobileFilterOpen(true)}
           query={query}
           onQueryChange={handleQueryChange}
+          onNearMeClick={handleNearMe}
+          isLocating={isLocating}
+          hasUserLocation={Boolean(userCoords.lat && userCoords.lng)}
         />
 
         {/* Dynamic Layout */}

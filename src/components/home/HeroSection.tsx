@@ -18,6 +18,7 @@ import {
   ChevronDown,
   Hotel,
   ArrowUpRight,
+  Navigation,
 } from "lucide-react";
 import type { Property } from "@/types";
 import StaySearchResults from "./StaySearchResults";
@@ -241,6 +242,40 @@ export default function HeroSection() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const [isLocating, setIsLocating] = useState(false);
+
+  const handleHeroNearMe = () => {
+    if (typeof window === "undefined" || !navigator?.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setIsLocating(false);
+        const { latitude, longitude } = pos.coords;
+        const params = new URLSearchParams();
+        params.set("lat", latitude.toString());
+        params.set("lng", longitude.toString());
+        params.set("sort", "distance_asc");
+        if (category !== "All") params.set("category", category);
+        router.push(`/search?${params.toString()}`);
+      },
+      (err) => {
+        setIsLocating(false);
+        console.warn("Geolocation fallback:", err.message);
+        // Fallback to Gachibowli / Anjaiah Nagar coordinates
+        const params = new URLSearchParams();
+        params.set("lat", "17.4468");
+        params.set("lng", "78.3653");
+        params.set("sort", "distance_asc");
+        if (category !== "All") params.set("category", category);
+        router.push(`/search?${params.toString()}`);
+      },
+      { timeout: 8000, enableHighAccuracy: true }
+    );
+  };
+
   const handleSelectSuggestion = (item: Suggestion) => {
     if (item.type === "property" && item.slug) {
       router.push(`/property/${item.slug}`);
@@ -266,12 +301,24 @@ export default function HeroSection() {
       setQuery(`${item.name}, ${item.city}`);
       setSelectedCity(item.city);
       setSelectedLocality(item.name);
+      const params = new URLSearchParams();
+      if (item.city) params.set("city", item.city);
+      params.set("locality", item.name);
+      if (category !== "All") params.set("category", category);
+      router.push(`/search?${params.toString()}`);
+      setShowSuggestions(false);
+      return;
     } else {
       setQuery(item.name);
       setSelectedCity(item.name);
       setSelectedLocality("");
+      const params = new URLSearchParams();
+      params.set("city", item.name);
+      if (category !== "All") params.set("category", category);
+      router.push(`/search?${params.toString()}`);
+      setShowSuggestions(false);
+      return;
     }
-    setShowSuggestions(false);
   };
 
   const handleSearch = (e?: React.FormEvent) => {
@@ -439,37 +486,50 @@ export default function HeroSection() {
         <motion.div variants={item} className="relative z-30 mt-9 max-w-4xl mx-auto">
           <div className="relative z-40 rounded-[22px] p-[1px] bg-gradient-to-br from-white/60 via-white/20 to-[#2CC5B9]/50 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.55)]">
             <div className="bg-white/95 dark:bg-[#0F1B2E]/90 backdrop-blur-xl p-3 sm:p-4 rounded-[21px]">
-              {/* Search mode tabs */}
-              <div className="flex items-center gap-1 p-1 mb-3 w-fit rounded-xl bg-slate-100 dark:bg-white/5 text-xs font-bold">
-                {(
-                  [
-                    { id: "location", label: "By location", icon: MapPin },
-                    { id: "name", label: "By stay name", icon: Hotel },
-                  ] as const
-                ).map((t) => {
-                  const Icon = t.icon;
-                  const active = mode === t.id;
-                  return (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => setMode(t.id)}
-                      className={`relative flex items-center gap-1.5 px-3.5 py-2 rounded-lg whitespace-nowrap transition-colors ${
-                        active ? "text-white" : "text-[#667A91] hover:text-[#142D4E] dark:hover:text-white"
-                      }`}
-                    >
-                      {active && (
-                        <motion.span
-                          layoutId="hero-search-tab"
-                          className="absolute inset-0 rounded-lg bg-primary dark:bg-[#159A91] shadow"
-                          transition={{ type: "spring", stiffness: 450, damping: 34 }}
-                        />
-                      )}
-                      <Icon className="relative w-3.5 h-3.5" />
-                      <span className="relative">{t.label}</span>
-                    </button>
-                  );
-                })}
+              {/* Search mode tabs + Near Me quick action */}
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="flex items-center gap-1 p-1 w-fit rounded-xl bg-slate-100 dark:bg-white/5 text-xs font-bold">
+                  {(
+                    [
+                      { id: "location", label: "By location", icon: MapPin },
+                      { id: "name", label: "By stay name", icon: Hotel },
+                    ] as const
+                  ).map((t) => {
+                    const Icon = t.icon;
+                    const active = mode === t.id;
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => setMode(t.id)}
+                        className={`relative flex items-center gap-1.5 px-3.5 py-2 rounded-lg whitespace-nowrap transition-colors ${
+                          active ? "text-white" : "text-[#667A91] hover:text-[#142D4E] dark:hover:text-white"
+                        }`}
+                      >
+                        {active && (
+                          <motion.span
+                            layoutId="hero-search-tab"
+                            className="absolute inset-0 rounded-lg bg-primary dark:bg-[#159A91] shadow"
+                            transition={{ type: "spring", stiffness: 450, damping: 34 }}
+                          />
+                        )}
+                        <Icon className="relative w-3.5 h-3.5" />
+                        <span className="relative">{t.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleHeroNearMe}
+                  disabled={isLocating}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#E8F5F4] dark:bg-[#159A91]/20 hover:bg-[#159A91] hover:text-white text-[#159A91] text-xs font-extrabold border border-[#159A91]/40 transition-all active:scale-95 shadow-xs whitespace-nowrap"
+                  title="Search verified stays closest to your live location"
+                >
+                  <Navigation className={`w-3.5 h-3.5 ${isLocating ? "animate-spin" : ""}`} />
+                  <span>{isLocating ? "Locating..." : "Near Me 📍"}</span>
+                </button>
               </div>
 
               <AnimatePresence mode="wait" initial={false}>

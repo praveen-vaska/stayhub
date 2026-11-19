@@ -212,11 +212,18 @@ export default function PropertyCard({ property, onContactClick }: PropertyCardP
         <div className="p-4 sm:p-5">
           {/* Rating & Location */}
           <div className="flex items-center justify-between gap-2 text-xs mb-2">
-            <div className="flex items-center gap-1 min-w-0 flex-1 text-[#667A91] font-medium">
+            <div className="flex items-center gap-1.5 min-w-0 flex-1 text-[#667A91] font-medium">
               <MapPin className="w-3.5 h-3.5 text-[#159A91] shrink-0" />
               <span className="truncate" title={`${property.locality}, ${property.city}`}>
                 {property.locality}, {property.city}
               </span>
+              {property.distanceKm !== undefined && (
+                <span className="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#E8F5F4] text-[#159A91] whitespace-nowrap">
+                  {property.distanceKm < 1
+                    ? `${Math.round(property.distanceKm * 1000)}m away`
+                    : `${property.distanceKm.toFixed(1)} km`}
+                </span>
+              )}
             </div>
 
             <div
