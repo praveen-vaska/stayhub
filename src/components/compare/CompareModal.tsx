@@ -198,7 +198,7 @@ export default function CompareModal({ isOpen, onClose, onOpenEnquiry }: Compare
                           </button>
                         ) : (
                           <a
-                            href={`https://wa.me/${prop.contact.whatsapp.replace(/[^0-9]/g, "")}`}
+                            href={`https://wa.me/${(prop.contact?.whatsapp || prop.contact?.phone || "919059030142").replace(/[^0-9]/g, "")}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="py-1.5 px-2 rounded-lg bg-[#159A91] text-center text-xs font-bold text-white hover:bg-[#118079] transition-colors flex items-center justify-center gap-1"

@@ -62,10 +62,13 @@ export default function EnquiryModal({ property, isOpen, onClose }: EnquiryModal
     }
   };
 
+  const contactName = property.contact?.name || `${property.title} Host`;
+  const contactWhatsapp = property.contact?.whatsapp || property.contact?.phone || "+91 90590 30142";
+
   const whatsappMessage = encodeURIComponent(
-    `Hi ${property.contact.name}, I found "${property.title}" on StayHub and would like to enquire about room availability.`
+    `Hi ${contactName}, I found "${property.title}" on StayHub and would like to enquire about room availability.`
   );
-  const whatsappUrl = `https://wa.me/${property.contact.whatsapp.replace(/[^0-9]/g, "")}?text=${whatsappMessage}`;
+  const whatsappUrl = `https://wa.me/${contactWhatsapp.replace(/[^0-9]/g, "")}?text=${whatsappMessage}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#142D4E]/60 backdrop-blur-sm animate-fade-in">
@@ -98,7 +101,7 @@ export default function EnquiryModal({ property, isOpen, onClose }: EnquiryModal
             </div>
             <h4 className="text-xl font-bold text-[#142D4E]">Enquiry Dispatched!</h4>
             <p className="text-xs sm:text-sm text-[#667A91] leading-relaxed max-w-sm mx-auto">
-              Your message has been sent to <strong>{property.contact.name}</strong>. The owner will respond to you shortly via phone/WhatsApp.
+              Your message has been sent to <strong>{contactName}</strong>. The owner will respond to you shortly via phone/WhatsApp.
             </p>
 
             <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center">

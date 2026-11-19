@@ -157,11 +157,17 @@ export default function PropertyDetailsPage() {
     }
   };
 
+  const contactName = property.contact?.name || `${property.title} Host`;
+  const contactPhone = property.contact?.phone || "+91 90590 30142";
+  const contactWhatsapp = property.contact?.whatsapp || contactPhone;
+
   const whatsappMessage = encodeURIComponent(
-    `Hi ${property.contact.name}, I am inquiring about "${property.title}" on StayHub.`
+    `Hi ${contactName}, I am inquiring about "${property.title}" on StayHub.`
   );
-  const whatsappUrl = `https://wa.me/${property.contact.whatsapp.replace(/[^0-9]/g, "")}?text=${whatsappMessage}`;
-  const googleMapsDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${property.coordinates.lat},${property.coordinates.lng}`;
+  const whatsappUrl = `https://wa.me/${contactWhatsapp.replace(/[^0-9]/g, "")}?text=${whatsappMessage}`;
+  const googleMapsDirectionsUrl = property.coordinates?.lat && property.coordinates?.lng
+    ? `https://www.google.com/maps/dir/?api=1&destination=${property.coordinates.lat},${property.coordinates.lng}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.title + " " + property.address)}`;
 
   const amenityIconMap: Record<string, any> = {
     "Wi-Fi": Wifi,
@@ -749,10 +755,10 @@ export default function PropertyDetailsPage() {
               <div className="p-3.5 rounded-xl bg-[#E8F5F4] border border-[#159A91]/20 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-white text-[#159A91] font-bold flex items-center justify-center text-sm shadow-sm">
-                    {property.contact.name[0]}
+                    {(contactName || "S")[0]}
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-[#142D4E] block">{property.contact.name}</span>
+                    <span className="text-xs font-bold text-[#142D4E] block">{contactName}</span>
                     <span className="text-[11px] text-[#159A91] font-semibold">Verified Property Host</span>
                   </div>
                 </div>
@@ -779,7 +785,7 @@ export default function PropertyDetailsPage() {
 
                 {showPhone ? (
                   <div className="p-3 rounded-xl bg-[#F7F8FA] border border-[#E7EDF3] text-center font-bold text-sm text-[#142D4E]">
-                    {property.contact.phone}
+                    {contactPhone}
                   </div>
                 ) : (
                   <button
